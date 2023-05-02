@@ -1,0 +1,15 @@
+*.plos.org/*
+*.jbc.org/*
+*.physiology.org/*
+*.rupress.org/*
+*.pnas.org/*
+*.embopress.org/*
+*.springer.com/*
+*.sciencedirect.com/*
+*.nature.com/*
+*.science.org/*
+*.cell.com/*
+*.wiley.com/*
+*.rsc.org/*
+*.acs.org/*
+*.ncbi.nlm.nih.gov/*
