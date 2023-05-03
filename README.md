@@ -13,5 +13,6 @@ For Biochemistry academic search, please look at the `academic_website.txt`.
 Go ahead to `search_and_sumarize.ipynb`
 ```
 conda create -n search -c conda-forge openai requests python-dotenv ipykernel
+# conda activate search
 # ipython kernel install --name search --user
 ```
