@@ -1,7 +1,8 @@
 import requests
+import openai
 
 
-def get_search_result(API_KEY, SEARCH_ENGINE_ID, query, page=[1]):
+def get_search_result(API_KEY, SEARCH_ENGINE_ID, query, page=[1], print_result=True):
     """
     API_KEY and SEARCH_ENGINE_ID are for the url
     query : keyword for searching
@@ -34,21 +35,55 @@ def get_search_result(API_KEY, SEARCH_ENGINE_ID, query, page=[1]):
 
             # print the results
             line = f"[{i + start - 1}]"
-            print(line)
             res_str += line + "\n"
 
             line = "Title: " + title
-            print(line)
             res_str += line + "\n"
 
             if long_description != "N/A":
                 line = "Long description: " + long_description
             else:
                 line = "Description: " + snippet
-            print(line)
             res_str += line + "\n"
 
             line = "URL: " + link + "\n"
-            print(line)
             res_str += line + "\n"
+    if print_result:
+        print(res_str)
     return res_str
+
+
+def search_res_decoration(search_res, question, query):
+    message_res = search_res + f"""
+    Here is the web search result using the following keywords "{query}".
+    1. Please write a comprehensive reply discussing "{question}". Make sure to cite search results using [number](URL) notation after the reference.
+    2. List all the useful reference you discussed using [number](URL) notation.
+    3. Provide more search keywords to better understand the first question.
+    """
+    return message_res
+
+
+def search_ask_gpt35t(query, question, page, GOOGLE_API_KEY, SEARCH_ENGINE_ID,
+                      decorat_fun=search_res_decoration, print_debug=True):
+    search_res = get_search_result(GOOGLE_API_KEY, SEARCH_ENGINE_ID, query, page=page, print_result=False)
+    message_res = decorat_fun(search_res, question, query)
+    message = [
+        {"role": "system", "content": "You are a helpful assistant that reads and summarizes academic literatures"},
+        {"role": "user", "content": message_res},
+    ]
+    res35T = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=message,
+        temperature=0.4,
+        max_tokens=800,
+    )
+    print("Keywords :", query)
+    print("Question :", question)
+    print()
+    print(res35T["choices"][0]["message"]["content"])
+
+    if print_debug:
+        print(res35T["usage"])
+        print("This conversation costs ", res35T["usage"]["total_tokens"] / 1000 * 0.002, "USD")
+        print(res35T["choices"][0]["finish_reason"])
+    return search_res, res35T
